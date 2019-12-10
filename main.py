@@ -5,6 +5,7 @@ import connectedcomponents as cc
 from matplotlib import pyplot as plt
 import os
 import operator
+import math
 
 #find characters using contour
 def findCharactersUsingContours(binary_image): # Encontrar cada caracteres utilizando identificacao de blobs por FindContours
@@ -14,8 +15,8 @@ def findCharactersUsingContours(binary_image): # Encontrar cada caracteres utili
     characters = cnts
     #print(characters)
     boundingBoxes = sorted(boundingBoxes, key=operator.itemgetter(0, 1)) # ordena os chars da esquerda para a direita e de cima para baixo
-    for box in boundingBoxes:
-        print(box)
+    #for box in boundingBoxes:
+        #print(box)
     if __debug__:
         for boundingBox in boundingBoxes:
             x,y,w,h = boundingBox
@@ -52,8 +53,7 @@ def buildCharacterMap():
     #cv2.imshow("aksjdfl", alphabet_th)
     return charactermap
 
-
-
+#img = cv2.imread("mono.jpg")
 img = cv2.imread("multilinemonospaced24.png")
 #alphabet = cv2.imread("testimage2.png")
 threshold = 200
@@ -75,6 +75,58 @@ th2, alphabet_th = cv2.threshold(gray_alphabet, 0, 255, cv2.THRESH_BINARY | cv2.
 
 # charactermap = buildCharacterMap()
 #print(charactermap)
+
+def rotateImage(image, angle):
+    #print(angle)
+    image_center = tuple(np.array(image.shape[1::-1]) / 2)
+    rot_mat = cv2.getRotationMatrix2D(image_center, angle, 1.0)
+    result = cv2.warpAffine(image, rot_mat, image.shape[1::-1], flags=cv2.INTER_LINEAR)
+    return result
+
+def rotate(image, angle, center = None, scale = 1.0):
+    (h, w) = image.shape[:2]
+
+    if center is None:
+        center = (w / 2, h / 2)
+
+    # Perform the rotation
+    M = cv2.getRotationMatrix2D(center, angle, scale)
+    rotated = cv2.warpAffine(image, M, (w, h))
+
+    return rotated
+
+def unrotateImage(src):
+    dst = cv2.Canny(src, 50, 200, None, 3)
+    cv2.imshow("Canny", dst)
+    lines = cv2.HoughLines(dst, 1, np.pi / 360, 190, None, 0, 0)
+    sum_theta = 0
+    print (lines)
+    thetas = np.zeros(len(lines))
+    count = 0
+    for i in range(len(lines)):
+        count += 1
+        rho = lines[i][0][0]
+        theta = lines [i][0][1]
+        a = math.cos(theta)
+        b = math.sin(theta)
+        x0 = a * rho
+        y0 = b * rho
+        pt1 = (int(x0 + 1000*(-b)), int(y0 + 1000*(a)))
+        pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
+        cv2.line(dst, pt1, pt2, (255,255,255), 1, cv2.LINE_AA)
+        sum_theta += theta
+        thetas[i] = theta
+    counts = np.bincount(int(thetas))
+    #print (theta)
+    average_theta = sum_theta/len(lines)
+    #print(average_theta)
+    rotated = rotateImage(src, theta*(180/np.pi)+180)
+    cv2.imshow("lines", dst)
+    cv2.waitKey(0)
+    exit(0)
+    return rotated
+
+#im_th = unrotateImage(im_th)
 characters, boundingBoxes = findCharactersUsingContours(np.bitwise_not(im_th))
 
 text = ""
@@ -87,12 +139,13 @@ gridSlotSizeX = 18
 gridSlotSizeY = 23
 
 for box in boundingBoxes:
-    x,y,w,h = box #the same, for a single character
+    x,y,w,h = box
+    cv2.circle(img2, (x,y), 2, (255,255,255), 2)
     if w < 4 or h < 5:
         continue
     startPointX = x - int((gridSlotSizeX - w)/2 + 0.5)
     startPointY = y - int((gridSlotSizeY - h)/2 + 0.5)
-    roi = im_th[y:y+h, x:x+w] # the same, for a single character
+    roi = im_th[y:y+h, x:x+w]
     cv2.rectangle(img2, (startPointX, startPointY),(startPointX + gridSlotSizeX, startPointY + gridSlotSizeY),(0,255,0),2)
     cv2.imshow("first", img2)
     while(len(img2 > startPointY)):
