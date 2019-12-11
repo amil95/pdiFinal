@@ -11,7 +11,7 @@ import hough
 import imageimport as imgimp
 import operations as op
 
-string1 = "droga.png"
+string1 = "damn.png"
 string2 = "alfabeto_roboto_mono.png"
 
 im_th, alphabet_th = imgimp.importImages(string1, string2)
@@ -28,7 +28,7 @@ ranger = 5
 img2 = im_th.copy()
 temp = 0
 
-gridSlotSizeX = 17
+gridSlotSizeX = 18
 gridSlotSizeY = 23
 #charactermap = op.buildCharacterMap(im_th)
 
