@@ -59,6 +59,7 @@ def getTextLinesFromHough(src):
     print(stdev_rhos)
     print(mean_rhos)
     print(mean_rhos+stdev_rhos)
+    print((difference_rhos))
     for i in range(len(difference_rhos)):
         if (thetas[i]*(180/np.pi) <= 93 and thetas[i]*(180/np.pi) >= 87):
             sum_thetas += thetas[i]
@@ -73,6 +74,14 @@ def getTextLinesFromHough(src):
             count_thetas = 0
             slice = i
             line_count += 1
+    #print(thetas[i]*(180/np.pi))
+    text_lines[line_count][0] = (np.sum(rhos[slice:i]))/(i-slice)
+    text_lines[line_count][1] = sum_thetas/count_thetas
+    #print((np.sum(thetas[slice:i]))/(i-slice)*(180/np.pi), i-slice, sep=' - ')
+    drawLine(copy, text_lines[line_count][0], text_lines[line_count][1])
+    sum_thetas = 0
+    count_thetas = 0
+    slice = i
     return copy2, text_lines[:line_count,:-1], copy
 
 def unrotateImage(src):
