@@ -23,57 +23,86 @@ def drawLine(img, rho, theta):
     pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
     cv2.line(img, pt1, pt2, (255,255,255), 1, cv2.LINE_AA)
 
-def unrotateImage(src):
+def meteHough(src):
     dst = cv2.Canny(src, 50, 200, None, 3)
-    #cv2.imshow("Canny", dst)
-    lines = cv2.HoughLines(dst, 1, np.pi / 720, 170, None, 0, 0)
+    lines = cv2.HoughLines(dst, 0.5, np.pi / 720, 140, None, 0, 0)
     lines = sorted(lines, key=lambda x:x[0][0])
+    return lines
+
+def getTextLinesFromHough(src):
+    lines = meteHough(src)
     rhos = np.zeros(len(lines))
     thetas = np.zeros(len(lines))
     difference_rhos = np.zeros(len(lines))
-    sum_thetas = 0
-    black = np.zeros(np.shape(src))
+    copy2 = np.bitwise_not(src.copy())
     for i in range(len(lines)):
-        rho = lines[i][0][0]
         rhos[i] = lines[i][0][0]
         thetas[i] = theta = lines[i][0][1]
-        drawLine(dst, rho, theta)
+        drawLine(copy2, rhos[i], thetas[i])
         if (i > 0):
             difference_rhos[i] = lines[i][0][0] - lines[i-1][0][0]
-        #cv2.imshow("lines", dst)
-        #cv2.waitKey()
-        sum_thetas += theta
-    stdev_rhos = statistics.stdev(difference_rhos)
-    # print("Standard deviation: ", stdev_rhos)
-    average_theta = sum_thetas/len(lines)
-    rotated = rotateImage(src, (average_theta*(180/np.pi))-90)
+    #print (difference_rhos)
+    cv2.imshow("Hough Lines after rotation", copy2)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
     line_count = 0
     text_lines = np.zeros((len(lines),2))
-
-    copy = np.bitwise_not(rotated.copy())
-
-
-
-    slice = 0;
+    copy = np.bitwise_not(src.copy())
+    slice = 0
+    sum_thetas = 0
+    count_thetas = 0
     for i in range(len(difference_rhos)):
-        if (difference_rhos[i] > 13):
-            # drawLine(src, rhos[i], thetas[i])
-            # cv2.imshow("Lines", src)
-            # cv2.waitKey(0)
-            # print(rhos[slice:i])
-            # print(thetas[slice:i])
-            text_lines[line_count][0] = ((np.sum(rhos[slice:i]))/(i-slice))
-            text_lines[line_count][1] = (np.sum(thetas[slice:i]))/(i-slice)
+        if (thetas[i]*(180/np.pi) <= 93 and thetas[i]*(180/np.pi) >= 87):
+            sum_thetas += thetas[i]
+            count_thetas+=1
+        if (difference_rhos[i] > 13 and thetas[i]*(180/np.pi) <= 93 and thetas[i]*(180/np.pi) >= 87):
+            #print(thetas[i]*(180/np.pi))
+            text_lines[line_count][0] = (np.sum(rhos[slice:i]))/(i-slice)
+            text_lines[line_count][1] = sum_thetas/count_thetas
+            #print((np.sum(thetas[slice:i]))/(i-slice)*(180/np.pi), i-slice, sep=' - ')
             drawLine(copy, text_lines[line_count][0], text_lines[line_count][1])
-            drawLine(black, text_lines[line_count][0], text_lines[line_count][1])
+            sum_thetas = 0
+            count_thetas = 0
             slice = i
             line_count += 1
+    return copy2, text_lines[:line_count,:-1], copy
+
+def unrotateImage(src):
+    lines = meteHough(src)
+    #rhos = np.zeros(len(lines))
+    #thetas = np.zeros(len(lines))
+    #difference_rhos = np.zeros(len(lines))
+    sum_thetas = 0
+    copy = np.bitwise_not(src)
+    for i in range(len(lines)):
+        rho = lines[i][0][0]
+        theta = lines[i][0][1]
+        #printprint(theta)
+        #print(theta*(180/np.pi))
+        drawLine(copy, rho, theta)
+        #if (i > 0):
+            #difference_rhos[i] = lines[i][0][0] - lines[i-1][0][0]
+        sum_thetas += theta
+    average_theta = sum_thetas/len(lines)
+    rotated = rotateImage(src, (average_theta*(180/np.pi))-90)
+    #stdev_rhos = statistics.stdev(difference_rhos)
+
+    # line_count = 0
+    # text_lines = np.zeros((len(lines),2))
+
+    # copy = np.bitwise_not(src.copy())
+
+    # slice = 0
+    # for i in range(len(difference_rhos)):
+    #     if (difference_rhos[i] > 13):
+    #         text_lines[line_count][0] = (np.sum(rhos[slice:i]))/(i-slice)
+    #         text_lines[line_count][1] = (np.sum(thetas[slice:i]))/(i-slice)
+    #         drawLine(copy, text_lines[line_count][0], text_lines[line_count][1])
+    #         slice = i
+            #line_count += 1
     # cv2.imshow("lines", dst)
     #exit(0)
-    black = rotateImage(black, (average_theta*(180/np.pi))-90)
-    cv2.imshow("black", black)
-    cv2.waitKey()
-    return rotated, dst, text_lines[:line_count,:-1], copy
+    return rotated, copy#, text_lines[:line_count,:-1], copy
 
 string1 = "textorotacionado.png"
 string2 = "monospaced24.png"

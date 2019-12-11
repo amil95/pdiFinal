@@ -7,7 +7,7 @@ def findCharactersUsingContours(binary_image): # Encontrar cada caracteres utili
     cnts, hier = cv2.findContours(binary_image.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # cnts = list of contours
     boundingBoxes = [cv2.boundingRect(c) for c in cnts] # bounding Box of each character
     characters = cnts
-    boundingBoxes = sorted(boundingBoxes, key=operator.itemgetter(0,1)) # ordena os chars da esquerda para a direita e de cima para baixo
+    boundingBoxes = sorted(boundingBoxes, key=operator.itemgetter(0)) # ordena os chars da esquerda para a direita e de cima para baixo
     mins = np.amin(boundingBoxes, axis = 0)
     min_x = mins[0]
     min_y = mins[1]

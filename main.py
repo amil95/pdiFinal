@@ -10,6 +10,7 @@ import math
 import hough
 import imageimport as imgimp
 import operations as op
+import operator
 
 def waitKey(b):
     a = cv2.waitKey(b)
@@ -20,22 +21,32 @@ def waitKey(b):
     else:
         return 0
 
-string1 = "texto_roboto_mono_24.png"
+string1 = "texto_roboto_mono_24_rotated.png"
 string2 = "alfabeto_roboto_mono.png"
-string1 = "alfabeto_roboto_mono.png"
 
 original, im_th, alphabet_th = imgimp.importImages(string1, string2)
 
-# cv2.imshow("Original", original)
-# waitKey()
-# cv2.destroyAllWindows()
-# cv2.imshow("Binary", im_th)
-# waitKey()
-# cv2.destroyAllWindows()
+cv2.imshow("Original", original)
+waitKey(0)
+cv2.destroyAllWindows()
 
-im_th, im_lines, text_lines, im_aggregated = hough.unrotateImage(im_th)
+cv2.imshow("Binary", im_th)
+waitKey(0)
+cv2.destroyAllWindows()
+
+im_th, im_lines = hough.unrotateImage(im_th)
 
 cv2.imshow("Hough Lines", im_lines)
+waitKey(0)
+cv2.destroyAllWindows()
+
+cv2.imshow("Correct rotation", im_th)
+waitKey(0)
+cv2.destroyAllWindows()
+
+im_lines_rotated, text_lines, im_aggregated = hough.getTextLinesFromHough(im_th)
+
+cv2.imshow("Hough Lines rotated", im_lines_rotated)
 waitKey(0)
 cv2.destroyAllWindows()
 
@@ -43,9 +54,6 @@ cv2.imshow("Hough Lines aggregated", im_aggregated)
 waitKey(0)
 cv2.destroyAllWindows()
 
-# cv2.imshow("Correct rotation", im_th)
-# waitKey()
-# cv2.destroyAllWindows()
 
 characters, boundingBoxes, min_x, min_y = op.findCharactersUsingContours(np.bitwise_not(im_th))
 
@@ -59,7 +67,8 @@ gridSlotSizeX = 18
 gridSlotSizeY = 31
 #charactermap = op.buildCharacterMap(im_th)
 a = 0
-
+# line = np.zeros((len(text_lines),100))
+    
 def findCharacterWidth(boundingBoxes, text_lines, img2):
     total = 0
     quant = 0
@@ -79,8 +88,7 @@ def findCharacterWidth(boundingBoxes, text_lines, img2):
             xant = x
             cv2.rectangle(img2, (x,y),(x+w, y+h),(0,255,0),2)
             cv2.imshow("media", img2)
-            # print(quant, lastx, firstx, int(((lastx+w)-firstx)/quant + 0.5))
-            waitKey(0)
+            waitKey(1)
     return(int(((lastx+w)-firstx)/quant + 0.5))
 
 print("Character Width: " , findCharacterWidth(boundingBoxes, text_lines, img2))
@@ -90,12 +98,15 @@ for box in boundingBoxes:
     x,y,w,h = box
     if w < 9 or h < 10:
         continue
+
     startPointX = min_x - int((gridSlotSizeX - w)/2 + 0.5)
     startPointY = min_y - int((gridSlotSizeY - h)/2 + 0.5) + 4
-    cv2.rectangle(img2, (startPointX, startPointY),(startPointX + gridSlotSizeX, startPointY + gridSlotSizeY),(0,255,0),2)
+    
+    i = 0
     waitKey(0)
     roi = im_th[y:y+h, x:x+w]
-    while(len(img2) > startPointY + gridSlotSizeY):
+    while(i < len(text_lines)):
+        startPointY = int(text_lines[i] - (gridSlotSizeY/2))
         startPointX = x - int((gridSlotSizeX - w)/2 + 0.5)
         while(len(img2[0]) > startPointX + gridSlotSizeX):
             alphabet_highlight = alphabet_th.copy() # copy original image for highlight characters
@@ -118,10 +129,10 @@ for box in boundingBoxes:
                 text = text + " "
                 continue
             fator = 32
-            # print(top_left[1])
-            if(top_left[1] < 46):
+            if(top_left[1] < 35):
                 fator = 0
-            if(top_left[1] > 46 and top_left[1] != 102):
+                print(top_left[1])
+            if(top_left[1] > 60 and top_left[1] != 102):
                 fator = -33
             text = text + chr(fator + 65 + int((top_left[0] + 9)/19))
             # print(text, top_left, chr(fator + 65 + int((top_left[0] + 9)/19)))
@@ -132,6 +143,6 @@ for box in boundingBoxes:
             else:
                 waitKey(3)
         text = text + " "
-        startPointY += 43
+        i += 1
     print(text)
     exit(0)
