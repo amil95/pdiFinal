@@ -32,6 +32,7 @@ def unrotateImage(src):
     thetas = np.zeros(len(lines))
     difference_rhos = np.zeros(len(lines))
     sum_thetas = 0
+    black = np.zeros(np.shape(src))
     for i in range(len(lines)):
         rho = lines[i][0][0]
         rhos[i] = lines[i][0][0]
@@ -44,13 +45,14 @@ def unrotateImage(src):
         sum_thetas += theta
     stdev_rhos = statistics.stdev(difference_rhos)
     # print("Standard deviation: ", stdev_rhos)
-
+    average_theta = sum_thetas/len(lines)
+    rotated = rotateImage(src, (average_theta*(180/np.pi))-90)
     line_count = 0
     text_lines = np.zeros((len(lines),2))
-    # print(thetas, rhos, sep=' - ')
-    # print(difference_rhos)
 
-    copy = np.bitwise_not(src.copy())
+    copy = np.bitwise_not(rotated.copy())
+
+
 
     slice = 0;
     for i in range(len(difference_rhos)):
@@ -60,17 +62,17 @@ def unrotateImage(src):
             # cv2.waitKey(0)
             # print(rhos[slice:i])
             # print(thetas[slice:i])
-            text_lines[line_count][0] = (np.sum(rhos[slice:i]))/(i-slice)
+            text_lines[line_count][0] = ((np.sum(rhos[slice:i]))/(i-slice))
             text_lines[line_count][1] = (np.sum(thetas[slice:i]))/(i-slice)
             drawLine(copy, text_lines[line_count][0], text_lines[line_count][1])
-            #cv2.imshow("Lines", copy)
-            #cv2.waitKey(0)
+            drawLine(black, text_lines[line_count][0], text_lines[line_count][1])
             slice = i
             line_count += 1
-    average_theta = sum_thetas/len(lines)
-    rotated = rotateImage(src, (average_theta*(180/np.pi))-90)
     # cv2.imshow("lines", dst)
     #exit(0)
+    black = rotateImage(black, (average_theta*(180/np.pi))-90)
+    cv2.imshow("black", black)
+    cv2.waitKey()
     return rotated, dst, text_lines[:line_count,:-1], copy
 
 string1 = "textorotacionado.png"
