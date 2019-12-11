@@ -9,7 +9,7 @@ def findCharactersUsingContours(binary_image): # Encontrar cada caracteres utili
     boundingBoxes = [cv2.boundingRect(c) for c in cnts] # bounding Box of each character
     print(boundingBoxes)
     characters = cnts
-    boundingBoxes = sorted(boundingBoxes, key=operator.itemgetter(0,1)) # ordena os chars da esquerda para a direita e de cima para baixo
+    boundingBoxes = sorted(boundingBoxes, key=operator.itemgetter(1,0)) # ordena os chars da esquerda para a direita e de cima para baixo
     if __debug__:
         for boundingBox in boundingBoxes:
             x,y,w,h = boundingBox
