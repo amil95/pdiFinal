@@ -23,14 +23,14 @@ def drawLine(img, rho, theta):
     pt2 = (int(x0 - 2000*(-b)), int(y0 - 2000*(a)))
     cv2.line(img, pt1, pt2, (255,255,255), 1, cv2.LINE_AA)
 
-def meteHough(src):
+def meteHough(src, res):
     dst = cv2.Canny(src, 50, 200, None, 3)
-    lines = cv2.HoughLines(dst, 0.5, np.pi / 720, 140, None, 0, 0)
+    lines = cv2.HoughLines(dst, 0.5, np.pi / 720, res, None, 0, 0)
     lines = sorted(lines, key=lambda x:x[0][0])
     return lines
 
 def getTextLinesFromHough(src):
-    lines = meteHough(src)
+    lines = meteHough(src, 130)
     rhos = np.zeros(len(lines))
     thetas = np.zeros(len(lines))
     difference_rhos = np.zeros(len(lines))
@@ -82,10 +82,11 @@ def getTextLinesFromHough(src):
     sum_thetas = 0
     count_thetas = 0
     slice = i
+    line_count += 1
     return copy2, text_lines[:line_count,:-1], copy
 
 def unrotateImage(src):
-    lines = meteHough(src)
+    lines = meteHough(src, 150)
     sum_thetas = 0
     copy = np.bitwise_not(src)
     for i in range(len(lines)):
