@@ -11,10 +11,14 @@ import hough
 import imageimport as imgimp
 import operations as op
 
-def waitKey():
-    a = cv2.waitKey(0)
+def waitKey(b):
+    a = cv2.waitKey(b)
     if a == 49:
         exit(0)
+    if a == 50:
+        return 1
+    else:
+        return 0
 
 string1 = "texto_roboto_mono_24.png"
 string2 = "alfabeto_roboto_mono.png"
@@ -53,27 +57,24 @@ temp = 0
 gridSlotSizeX = 18
 gridSlotSizeY = 31
 #charactermap = op.buildCharacterMap(im_th)
+a = 0
 
 for box in boundingBoxes:
     x,y,w,h = box
     if w < 9 or h < 10:
         continue
     startPointX = min_x - int((gridSlotSizeX - w)/2 + 0.5)
-    startPointY = min_y - int((gridSlotSizeY - h)/2 + 0.5)
+    startPointY = min_y - int((gridSlotSizeY - h)/2 + 0.5) + 4
     cv2.rectangle(img2, (startPointX, startPointY),(startPointX + gridSlotSizeX, startPointY + gridSlotSizeY),(0,255,0),2)
-    cv2.imshow("Found characters", img2)
-    waitKey()
+    waitKey(0)
     roi = im_th[y:y+h, x:x+w]
     while(len(img2) > startPointY + gridSlotSizeY):
         startPointX = x - int((gridSlotSizeX - w)/2 + 0.5)
-        while(len(img2[0]) > startPointX):
+        while(len(img2[0]) > startPointX + gridSlotSizeX):
             alphabet_highlight = alphabet_th.copy() # copy original image for highlight characters
             roi = im_th[startPointY:startPointY + gridSlotSizeY, startPointX:startPointX + gridSlotSizeX]
             cv2.rectangle(img2, (startPointX, startPointY),(startPointX + gridSlotSizeX, startPointY + gridSlotSizeY),(0,255,0),2)
-            cv2.imshow("passou", img2)
-
-            waitKey()
-
+            cv2.imshow("Text", img2)
             result = cv2.matchTemplate(np.bitwise_not(alphabet_th), roi, cv2.TM_SQDIFF) # template matching
             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result) # get location for highest score
             w, h = roi.shape[::-1]  #get shape of roi
@@ -96,25 +97,14 @@ for box in boundingBoxes:
             if(top_left[1] > 46 and top_left[1] != 102):
                 fator = -33
             text = text + chr(fator + 65 + int((top_left[0] + 9)/19))
-            print(text, top_left, chr(fator + 65 + int((top_left[0] + 9)/19)))
+            # print(text, top_left, chr(fator + 65 + int((top_left[0] + 9)/19)))
+            # os.system('cls') 
+            print(text, "\n")
+            if a == 0:
+                a = waitKey(0)
+            else:
+                waitKey(3)
+        text = text + " "
         startPointY += 43
     print(text)
     exit(0)
-
-    if (temp-x) >= 29:
-        text = text + " "
-    #print(temp - x, temp, x)
-    temp = x
-    typei=0
-    # for i in range(len(charactermap)):
-    #     #print(charactermap[i][0], max_loc[0], charactermap[i][1], max_loc[1], charactermap[i][0], max_loc[0]-ranger, charactermap[i][1], max_loc[1]-ranger, sep=", ")
-    #     if charactermap[i][0] <= max_loc[0]+ranger and charactermap[i][1] <= max_loc[1]+ranger and charactermap[i][0] >= max_loc[0]-ranger and charactermap[i][1] >= max_loc[1]-ranger:
-    #         text = text + str(chr(i+65))
-    #         #cv2.circle(alphabet_highlight, max_loc, 2, (255,255,255), 2)
-    #         #cv2.imshow("aldskjaçl", alphabet_highlight)
-    #         # cv2.waitKey(0)
-    #         print(text)
-        # i+=1
-print(text)
-cv2.waitKey(0)
-cv2.destroyAllWindows()

@@ -12,7 +12,7 @@ def findCharactersUsingContours(binary_image): # Encontrar cada caracteres utili
     min_x = mins[0]
     min_y = mins[1]
     cv2.circle(binary_image, (min_x, min_y), 5, (255,255,255), 5)
-    cv2.imshow("asdf", binary_image)
+    # cv2.imshow("asdf", binary_image)
     cv2.waitKey()
     if __debug__:
         for boundingBox in boundingBoxes:
