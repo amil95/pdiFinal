@@ -28,7 +28,7 @@ ranger = 5
 img2 = im_th.copy()
 temp = 0
 
-gridSlotSizeX = 10
+gridSlotSizeX = 18
 gridSlotSizeY = 23
 #charactermap = op.buildCharacterMap(im_th)
 
