@@ -39,9 +39,9 @@ def unrotateImage(src):
     average_theta = sum_theta/len(lines)
     #print(average_theta)
     rotated = rotateImage(src, (average_theta*(180/np.pi))-90)
-    cv2.imshow("lines", dst)
+    #cv2.imshow("lines", dst)
     #exit(0)
-    return rotated
+    return rotated, dst
 
 string1 = "textorotacionado.png"
 string2 = "monospaced24.png"

@@ -14,4 +14,4 @@ def importImages(image, alphabet):
     th, im_th = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU) #binary image
     th2, alphabet_th = cv2.threshold(gray_alphabet, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU) #ensure binary
 
-    return im_th, alphabet_th
+    return img, im_th, alphabet_th
