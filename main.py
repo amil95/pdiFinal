@@ -28,9 +28,13 @@ original, im_th, alphabet_th = imgimp.importImages(string1, string2)
 # waitKey()
 # cv2.destroyAllWindows()
 
-im_th, lines = hough.unrotateImage(im_th)
+im_th, im_lines, text_lines, im_aggregated = hough.unrotateImage(im_th)
 
-cv2.imshow("Hough Lines", lines)
+cv2.imshow("Hough Lines", im_lines)
+waitKey()
+cv2.destroyAllWindows()
+
+cv2.imshow("Hough Lines aggregated", im_aggregated)
 waitKey()
 cv2.destroyAllWindows()
 
