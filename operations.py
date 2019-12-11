@@ -17,9 +17,9 @@ def findCharactersUsingContours(binary_image): # Encontrar cada caracteres utili
     if __debug__:
         for boundingBox in boundingBoxes:
             x,y,w,h = boundingBox
-            roi = binary_image[y:y+h, x:x+w] # the same, for a single character
-            cv2.rectangle(binary_image,(min_x,min_y),(x+w,y+h),(255,255,255),2)
-            cv2.waitKey(0)
+            # roi = binary_image[y:y+h, x:x+w] # the same, for a single character
+            # cv2.rectangle(binary_image,(min_x,min_y),(x+w,y+h),(255,255,255),2)
+            # cv2.waitKey(0)
             #cv2.destroyAllWindows()
     return characters, boundingBoxes, min_x, min_y
 

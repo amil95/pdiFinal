@@ -1,7 +1,7 @@
 #python modules
 import cv2
 import numpy as np
-import dft as dft
+# import dft as dft
 import connectedcomponents as cc
 from matplotlib import pyplot as plt
 import os
@@ -22,8 +22,9 @@ def waitKey(b):
     else:
         return 0
 
-# string1 = "texto_roboto_mono_24_rotated.png"
-string1 = "lorem_roboto_mono_14_rotated.png"
+string1 = "texto_roboto_mono_24_rotated.png"
+# string1 = "lorem_roboto_mono_20.png"
+# string1 = "resizeimg.jpg"
 string2 = "alfabeto_roboto_mono.png"
 
 original, im_th, alphabet_th = imgimp.importImages(string1, string2)
@@ -73,8 +74,6 @@ stdev_h = statistics.stdev(np.squeeze(boundingBoxes_a[:,3:4]))
 meanW = statistics.mean(np.squeeze(boundingBoxes_a[:,2:3]))
 meanH = statistics.mean(np.squeeze(boundingBoxes_a[:,3:4]))
 
-gridSlotSizeX = 18
-gridSlotSizeY = 31
 #charactermap = op.buildCharacterMap(im_th)
 a = 0
 # line = np.zeros((len(text_lines),100))
@@ -96,24 +95,34 @@ def findCharacterWidth(boundingBoxes, text_lines, img2):
             if(x - xant > 2*w):
                 quant += int((x-xant)/(2*w) + 0.5)
             xant = x
-            cv2.rectangle(img2, (x,y),(x+w, y+h),(0,255,0),2)
-            cv2.imshow("media", img2)
-            waitKey(1)
+            # cv2.rectangle(img2, (x,y),(x+w, y+h),(0,255,0),2)
+            # cv2.imshow("media", img2)
+            # waitKey(0)
     return(int(((lastx+w)-firstx)/quant + 0.5))
-
-print("Character Width: " , findCharacterWidth(boundingBoxes, text_lines, img2))
+chrWidth = findCharacterWidth(boundingBoxes, text_lines, img2)
+print("Character Width: " , chrWidth)
+gridSlotSizeX = chrWidth + (1 - chrWidth%2)
+gridSlotSizeY = int(chrWidth *1.8)
 # gridSlotSizeX = int(((lastx+w)-firstx)/quant + 0.5)
+if(chrWidth < 18):
+    oriimg = alphabet_th
+    height, width = oriimg.shape
+    imgScale = chrWidth/18
+    newX,newY = oriimg.shape[1]*imgScale, oriimg.shape[0]*imgScale
+    alphabet_th = cv2.resize(oriimg,(int(newX),int(newY)))
+    cv2.imshow("Show by CV2",alphabet_th)
+    cv2.waitKey(0)
+    # cv2.imwrite("resizeimg.jpg",newimg)
 
 for box in boundingBoxes:
     x,y,w,h = box
-    if w < 9 or h < 10:
+    if w < meanW - stdev_w or h < meanH - stdev_h:
         continue
 
-    startPointX = min_x - int((gridSlotSizeX - w)/2 + 0.5)
+    startPointX = min_x - int((chrWidth - w)/2 + 0.5)
     startPointY = min_y - int((gridSlotSizeY - h)/2 + 0.5) + 4
     
     i = 0
-    waitKey(0)
     roi = im_th[y:y+h, x:x+w]
     while(i < len(text_lines)):
         startPointY = int(text_lines[i] - (gridSlotSizeY/2))
@@ -131,22 +140,16 @@ for box in boundingBoxes:
             alphabet_highlight = alphabet_th.copy() # copy original image for highlight characters
             cv2.rectangle(alphabet_highlight, top_left, bottom_right, (0,0,0), 2)
             cv2.imshow("Alphabet", alphabet_highlight)
-            startPointX += (gridSlotSizeX + 1)
-            if(top_left[1] == 102):
-                if(text[len(text) - 1] == " "):
-                    startPointX += 1000
-                    continue
-                text = text + " "
-                continue
+            startPointX += (gridSlotSizeX)
             fator = 32
-            if(top_left[1] < 35):
+            if(top_left[1] < len(alphabet_th)/4):
                 fator = 0
-                print(top_left[1])
-            if(top_left[1] > 60 and top_left[1] != 102):
+            if(top_left[1] > 60 and not (top_left[1] >= 100 and top_left[1] < 120)):
                 fator = -33
-            text = text + chr(fator + 65 + int((top_left[0] + 9)/19))
-            # print(text, top_left, chr(fator + 65 + int((top_left[0] + 9)/19)))
-            # os.system('cls')
+            if((fator + 65 + int((top_left[0] + (w/2))/(gridSlotSizeX))) == 32 and text[len(text) - 1] == " "):
+                startPointX += 1000
+                continue
+            text = text + chr(fator + 65 + int((top_left[0] + (w/2))/(gridSlotSizeX)))
             print(text, "\n")
             if a == 0:
                 a = waitKey(0)
