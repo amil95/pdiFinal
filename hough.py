@@ -64,7 +64,7 @@ def getTextLinesFromHough(src):
         if (thetas[i]*(180/np.pi) <= 93 and thetas[i]*(180/np.pi) >= 87):
             sum_thetas += thetas[i]
             count_thetas+=1
-        if ((difference_rhos[i] > mean_rhos+(stdev_rhos/2) and thetas[i]*(180/np.pi) <= 95 and thetas[i]*(180/np.pi) >= 85)):
+        if (difference_rhos[i] > mean_rhos+(stdev_rhos/2) and thetas[i]*(180/np.pi) <= 95 and thetas[i]*(180/np.pi) >= 85):
             #print(thetas[i]*(180/np.pi))
             text_lines[line_count][0] = (np.sum(rhos[slice:i]))/(i-slice)
             text_lines[line_count][1] = sum_thetas/count_thetas
