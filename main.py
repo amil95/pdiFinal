@@ -13,11 +13,10 @@ import operations as op
 
 def waitKey():
     a = cv2.waitKey(0)
-    # print(a)
     if a == 49:
         exit(0)
 
-string1 = "texto_roboto_mono_24_rotated.png"
+string1 = "texto_roboto_mono_24.png"
 string2 = "alfabeto_roboto_mono.png"
 
 original, im_th, alphabet_th = imgimp.importImages(string1, string2)
@@ -31,9 +30,9 @@ original, im_th, alphabet_th = imgimp.importImages(string1, string2)
 
 im_th, lines = hough.unrotateImage(im_th)
 
-# cv2.imshow("Hough Lines", lines)
-# waitKey()
-# cv2.destroyAllWindows()
+cv2.imshow("Hough Lines", lines)
+waitKey()
+cv2.destroyAllWindows()
 
 # cv2.imshow("Correct rotation", im_th)
 # waitKey()
@@ -48,25 +47,29 @@ img2 = im_th.copy()
 temp = 0
 
 gridSlotSizeX = 18
-gridSlotSizeY = 23
+gridSlotSizeY = 31
 #charactermap = op.buildCharacterMap(im_th)
 
 for box in boundingBoxes:
     x,y,w,h = box
     if w < 9 or h < 10:
         continue
-    startPointX = x - int((gridSlotSizeX - w)/2 + 0.5)
-    startPointY = y - int((gridSlotSizeY - h)/2 + 0.5)
+    startPointX = min_x - int((gridSlotSizeX - w)/2 + 0.5)
+    startPointY = min_y - int((gridSlotSizeY - h)/2 + 0.5)
     cv2.rectangle(img2, (startPointX, startPointY),(startPointX + gridSlotSizeX, startPointY + gridSlotSizeY),(0,255,0),2)
     cv2.imshow("Found characters", img2)
     waitKey()
     roi = im_th[y:y+h, x:x+w]
-    while(len(img2 > startPointY)):
+    while(len(img2) > startPointY + gridSlotSizeY):
         startPointX = x - int((gridSlotSizeX - w)/2 + 0.5)
         while(len(img2[0]) > startPointX):
+            alphabet_highlight = alphabet_th.copy() # copy original image for highlight characters
             roi = im_th[startPointY:startPointY + gridSlotSizeY, startPointX:startPointX + gridSlotSizeX]
             cv2.rectangle(img2, (startPointX, startPointY),(startPointX + gridSlotSizeX, startPointY + gridSlotSizeY),(0,255,0),2)
-            cv2.imshow("Found characters", img2)
+            cv2.imshow("passou", img2)
+
+            waitKey()
+
             result = cv2.matchTemplate(np.bitwise_not(alphabet_th), roi, cv2.TM_SQDIFF) # template matching
             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result) # get location for highest score
             w, h = roi.shape[::-1]  #get shape of roi
@@ -76,20 +79,24 @@ for box in boundingBoxes:
             cv2.rectangle(alphabet_highlight, top_left, bottom_right, (0,0,0), 2)
             cv2.imshow("Alphabet", alphabet_highlight)
             startPointX += (gridSlotSizeX+1)
-
-            if(top_left[1] == 17):
+            if(top_left[1] == 102):
                 if(text[len(text) - 1] == " "):
                     startPointX += 1000
+                    continue
                 text = text + " "
                 continue
-
-            fator = 0
-            if(top_left[1] < 17):
-                fator = 32
+            fator = 32
+            # print(top_left[1])
+            if(top_left[1] < 46):
+                fator = 0
+            if(top_left[1] > 46 and top_left[1] != 102):
+                fator = -33
             text = text + chr(fator + 65 + int((top_left[0] + 9)/19))
-            print(text)
-            waitKey()
-        startPointY += 38
+            print(text, top_left, chr(fator + 65 + int((top_left[0] + 9)/19)))
+        startPointY += 43
+    print(text)
+    exit(0)
+
     if (temp-x) >= 29:
         text = text + " "
     #print(temp - x, temp, x)

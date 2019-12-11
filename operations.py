@@ -34,7 +34,7 @@ def buildCharacterMap(alphabet):
     th2, alphabet_th = cv2.threshold(gray_alphabet, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU) #ensure binary
     characters, boundingBoxes = findCharactersUsingContours(np.bitwise_not(alphabet_th))
     charactermap = np.zeros((26,2))
-    i=0;
+    i=0
     for box in boundingBoxes:
         x,y,w,h = box #the same, for a single character
         roi = alphabet_th[y:y+h, x:x+w] # the same, for a single character
