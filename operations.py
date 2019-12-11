@@ -5,17 +5,19 @@ import operator
 #find characters using contour
 def findCharactersUsingContours(binary_image): # Encontrar cada caracteres utilizando identificacao de blobs por FindContours
     cnts, hier = cv2.findContours(binary_image.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # cnts = list of contours
+    print(cnts)
     boundingBoxes = [cv2.boundingRect(c) for c in cnts] # bounding Box of each character
+    print(boundingBoxes)
     characters = cnts
-    boundingBoxes = sorted(boundingBoxes, key=operator.itemgetter(0, 1)) # ordena os chars da esquerda para a direita e de cima para baixo
+    boundingBoxes = sorted(boundingBoxes, key=operator.itemgetter(0,1)) # ordena os chars da esquerda para a direita e de cima para baixo
     if __debug__:
         for boundingBox in boundingBoxes:
             x,y,w,h = boundingBox
-            #roi = im_th[y:y+h, x:x+w] # the same, for a single character
-            # cv2.rectangle(binary_image,(x,y),(x+w,y+h),(255,255,255),2)
-            # cv2.imshow("asdf", binary_image)
-            # cv2.waitKey(0)
-            # cv2.destroyAllWindows()
+            roi = binary_image[y:y+h, x:x+w] # the same, for a single character
+            cv2.rectangle(binary_image,(x,y),(x+w,y+h),(255,255,255),2)
+            #cv2.imshow("asdf", binary_image)
+            #cv2.waitKey(0)
+            #cv2.destroyAllWindows()
     return characters, boundingBoxes
 
 def templateMatching(image, template):
@@ -39,3 +41,15 @@ def buildCharacterMap(alphabet):
         i+=1
     #cv2.imshow("aksjdfl", alphabet_th)
     return charactermap
+
+def removeBlackBackgroundWithFindContours(image):
+    characters, boundingBoxes = findCharactersUsingContours((image))
+    for box in boundingBoxes:
+        print
+        x,y,w,h = box
+        roi = image[y:y+h, x:x+w] # the same, for a single character
+        cv2.rectangle(image,(x,y),(x+w,y+h),(255,255,255),2)
+    #cv2.imshow("asdf", roi)
+    #print(boundingBoxes)
+    return roi
+    #exit(0)

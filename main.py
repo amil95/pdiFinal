@@ -11,12 +11,15 @@ import hough
 import imageimport as imgimp
 import operations as op
 
-string1 = "multilinemonospaced24.png"
-string2 = "monospaced24.png"
+string1 = "droga.png"
+string2 = "alfabeto_roboto_mono.png"
 
 im_th, alphabet_th = imgimp.importImages(string1, string2)
 
 #im_th = hough.unrotateImage(im_th)
+
+im_th = op.removeBlackBackgroundWithFindContours(im_th)
+cv2.imshow("Black Background Removed", im_th)
 characters, boundingBoxes = op.findCharactersUsingContours(np.bitwise_not(im_th))
 
 text = ""
@@ -25,13 +28,15 @@ ranger = 5
 img2 = im_th.copy()
 temp = 0
 
-gridSlotSizeX = 18
+gridSlotSizeX = 10
 gridSlotSizeY = 23
 #charactermap = op.buildCharacterMap(im_th)
 
+alphabet_highlight = alphabet_th.copy() # copy original image for highlight characters
+
 for box in boundingBoxes:
     x,y,w,h = box
-    if w < 4 or h < 5:
+    if w < 9 or h < 10:
         continue
     startPointX = x - int((gridSlotSizeX - w)/2 + 0.5)
     startPointY = y - int((gridSlotSizeY - h)/2 + 0.5)
@@ -43,7 +48,7 @@ for box in boundingBoxes:
         while(len(img2[0]) > startPointX):
             roi = im_th[startPointY:startPointY + gridSlotSizeY, startPointX:startPointX + gridSlotSizeX]
             cv2.rectangle(img2, (startPointX, startPointY),(startPointX + gridSlotSizeX, startPointY + gridSlotSizeY),(0,255,0),2)
-            cv2.imshow("first", img2)
+            cv2.imshow("passou", img2)
 
             cv2.waitKey(0)
 
@@ -52,17 +57,16 @@ for box in boundingBoxes:
             w, h = roi.shape[::-1]  #get shape of roi
             top_left = max_loc  #top left of rectangle
             bottom_right = (top_left[0] + w, top_left[1] + h) #bottom_right of rectangle
-            alphabet_highlight = alphabet_th.copy() # copy original image for highlight characters
             cv2.rectangle(alphabet_highlight, top_left, bottom_right, (0,0,0), 2)
             cv2.imshow("a", alphabet_highlight)
-            startPointX += 19
+            startPointX += (gridSlotSizeX+1)
             if(top_left[1] == 17):
                 if(text[len(text) - 1] == " "):
                     startPointX += 1000
                 text = text + " "
                 continue
             fator = 0
-            if(top_left[1] == 2):
+            if(top_left[1] < 17):
                 fator = 32
             text = text + chr(fator + 65 + int((top_left[0] + 9)/19))
             print(text)
