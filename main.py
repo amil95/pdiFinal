@@ -11,6 +11,7 @@ import hough
 import imageimport as imgimp
 import operations as op
 import operator
+import statistics
 
 def waitKey(b):
     a = cv2.waitKey(b)
@@ -21,7 +22,8 @@ def waitKey(b):
     else:
         return 0
 
-string1 = "texto_roboto_mono_24_rotated.png"
+# string1 = "texto_roboto_mono_24_rotated.png"
+string1 = "lorem_roboto_mono_14_rotated.png"
 string2 = "alfabeto_roboto_mono.png"
 
 original, im_th, alphabet_th = imgimp.importImages(string1, string2)
@@ -63,6 +65,14 @@ ranger = 5
 img2 = im_th.copy()
 temp = 0
 
+boundingBoxes_a = np.asarray(boundingBoxes)
+
+stdev_w = statistics.stdev(np.squeeze(boundingBoxes_a[:,2:3]))
+stdev_h = statistics.stdev(np.squeeze(boundingBoxes_a[:,3:4]))
+
+meanW = statistics.mean(np.squeeze(boundingBoxes_a[:,2:3]))
+meanH = statistics.mean(np.squeeze(boundingBoxes_a[:,3:4]))
+
 gridSlotSizeX = 18
 gridSlotSizeY = 31
 #charactermap = op.buildCharacterMap(im_th)
@@ -77,7 +87,7 @@ def findCharacterWidth(boundingBoxes, text_lines, img2):
     lastx = 0
     for box in boundingBoxes:
         x,y,w,h = box
-        if(y > text_lines[0] - 15 and y < text_lines[0] + 15 and w > 10 and h > 10):
+        if( y < text_lines[0] and w > meanW - stdev_w and h > meanH - stdev_h):
             quant += 1
             if(firstx > x):
                 firstx = x
