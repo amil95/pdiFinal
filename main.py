@@ -11,12 +11,12 @@ import hough
 import imageimport as imgimp
 import operations as op
 
-string1 = "damn.png"
+string1 = "texto_roboto_mono_24.png"
 string2 = "alfabeto_roboto_mono.png"
 
 im_th, alphabet_th = imgimp.importImages(string1, string2)
 
-#im_th = hough.unrotateImage(im_th)
+im_th = hough.unrotateImage(im_th)
 
 im_th = op.removeBlackBackgroundWithFindContours(im_th)
 cv2.imshow("Black Background Removed", im_th)
