@@ -41,6 +41,8 @@ def getTextLinesFromHough(src):
         drawLine(copy2, rhos[i], thetas[i])
         if (i > 0):
             difference_rhos[i] = lines[i][0][0] - lines[i-1][0][0]
+        else: difference_rhos[i] = 0
+
     #print (difference_rhos)
     cv2.imshow("Hough Lines after rotation", copy2)
     cv2.waitKey(0)
@@ -53,15 +55,15 @@ def getTextLinesFromHough(src):
     count_thetas = 0
     stdev_rhos = statistics.variance(difference_rhos)
     mean_rhos = statistics.mean(difference_rhos)
-    #print(difference_rhos)
-    print(np.max(difference_rhos))
+    #print(np.max(difference_rhos))
     print(stdev_rhos)
     print(mean_rhos)
+    print(mean_rhos+stdev_rhos)
     for i in range(len(difference_rhos)):
         if (thetas[i]*(180/np.pi) <= 93 and thetas[i]*(180/np.pi) >= 87):
             sum_thetas += thetas[i]
             count_thetas+=1
-        if (difference_rhos[i] > mean_rhos+stdev_rhos and thetas[i]*(180/np.pi) <= 95 and thetas[i]*(180/np.pi) >= 85):
+        if ((difference_rhos[i] > mean_rhos+(stdev_rhos/2) and thetas[i]*(180/np.pi) <= 95 and thetas[i]*(180/np.pi) >= 85)):
             #print(thetas[i]*(180/np.pi))
             text_lines[line_count][0] = (np.sum(rhos[slice:i]))/(i-slice)
             text_lines[line_count][1] = sum_thetas/count_thetas
@@ -83,8 +85,6 @@ def unrotateImage(src):
     for i in range(len(lines)):
         rho = lines[i][0][0]
         theta = lines[i][0][1]
-        #printprint(theta)
-        #print(theta*(180/np.pi))
         drawLine(copy, rho, theta)
         #if (i > 0):
             #difference_rhos[i] = lines[i][0][0] - lines[i-1][0][0]
